@@ -1,0 +1,35 @@
+import std.console;
+
+void main(string args[])
+{
+  if(args.len != 2)
+    {
+      println("Syntax: testy filename");
+      return;
+    }
+
+  string command = "xrun";
+
+  path file = args[1];
+  string output;
+  println("Running ", file);
+  std.system.exec(command ~ " " ~ file, workDir=file.dir, redirOutString=output);
+
+  var res = testFile(file, output);
+  if(!res)
+    {
+      println("  Ok");
+      return;
+    }
+
+  if(res.diff)
+    println("There were differences:\n",res.diff.toString(color=true));
+  else
+    println("New file! Output is:\n", res.output);
+
+  println("Approve changes? (y/N)");
+  if(getChar() =I= 'y')
+    res.approve();
+  else
+    println("New output stored in ",res.outNew);
+}

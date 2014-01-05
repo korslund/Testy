@@ -1,0 +1,41 @@
+/* Handle the output of a single file test run
+
+   file:    The test file base name
+
+   output:  Output from running the test
+
+   outDir:  Where to place output files. Default is same dir as the
+            test file.
+
+ */
+var testFile(path file, string output, path outDir="")
+{
+  if(!outDir) outDir = file.dir;
+  path outBase = outDir / file.base ~ ".testy";
+  path outNew = outBase ~ ".new";
+  path outWrong = outBase ~ ".wrong";
+
+  import std.stream: File;
+
+  // Dump the output so the user can inspect it
+  File.Write(outNew,output);
+
+  // Is there an existing output file?
+  var diff, old;
+  if(outBase.exists)
+    {
+      // Compute diff
+      old = File.Read(outBase);
+      diff = std.text.diff(old, output);
+
+      // Return if there was no difference
+      if(!diff) return null;
+    }
+
+  // Return an object that lets the user handle the result
+  return [output=output,old=old,diff=diff,outNew=outNew,
+          approve =
+      {
+        outNew.moveFileTo(outBase,force=true);
+      }];
+}
