@@ -6,36 +6,31 @@
 
    outDir:  Where to place output files. Default is same dir as the
             test file.
-
  */
-var testFile(path file, string output, path outDir="")
-{
-  if(!outDir) outDir = file.dir;
-  path outBase = outDir / file.base ~ ".testy";
-  path outNew = outBase ~ ".new";
-  path outWrong = outBase ~ ".wrong";
+var testFile(path file, string output, path outDir="");
 
-  import std.stream: File;
+if(!outDir) outDir = file.dir;
+path outBase = outDir / file.base ~ ".testy";
+path outNew = outBase ~ ".new";
+path outWrong = outBase ~ ".wrong";
 
-  // Dump the output so the user can inspect it
-  File.Write(outNew,output);
+import std.stream: File;
 
-  // Is there an existing output file?
-  var diff, old;
-  if(outBase.exists)
-    {
-      // Compute diff
-      old = File.Read(outBase);
-      diff = std.text.diff(old, output);
+// Dump the output so the user can inspect it
+File.Write(outNew,output);
 
-      // Return if there was no difference
-      if(!diff) return null;
-    }
+// Is there an existing output file?
+var diff, old;
+if(outBase.exists)
+  {
+    // Compute diff
+    old = File.Read(outBase);
+    diff = std.text.diff(old, output);
 
-  // Return an object that lets the user handle the result
-  return [output=output,old=old,diff=diff,outNew=outNew,
-          approve =
-      {
-        outNew.moveFileTo(outBase,force=true);
-      }];
-}
+    // Return if there was no difference
+    if(!diff) return null;
+  }
+
+// Return an object that lets the user handle the result
+return [output=output,old=old,diff=diff,outNew=outNew,
+        approve = {outNew.moveFileTo(outBase,force=true);} ];
